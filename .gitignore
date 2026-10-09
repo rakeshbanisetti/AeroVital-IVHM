@@ -31,3 +31,13 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Test and coverage output
+.pytest_cache/
+htmlcov/
+.coverage
