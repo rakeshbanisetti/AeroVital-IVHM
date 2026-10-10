@@ -55,3 +55,55 @@ def test_duplicate_uav_code_is_rejected():
 
     assert first_response.status_code == 201
     assert second_response.status_code == 409
+
+
+def test_sensor_prediction_endpoint():
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    sensor_data = {
+        "motor_temp_c": 45,
+        "motor_vibration": 0.1,
+        "motor_current_a": 5,
+        "motor_rpm": 4500,
+        "battery_voltage_v": 22.2,
+        "battery_current_a": 5,
+        "battery_temp_c": 30,
+        "battery_soc_pct": 90,
+        "altitude_m": 50,
+        "speed_mps": 10,
+        "acceleration_mps2": 0.2,
+        "ambient_temp_c": 25,
+        "pressure_hpa": 1013,
+        "humidity_pct": 40,
+    }
+
+    response = client.post("/api/v1/predictions/", json=sensor_data)
+
+    assert response.status_code == 200
+    result = response.json()
+    assert isinstance(result["is_anomaly"], bool)
+    assert isinstance(result["predicted_fault"], str)
+    assert result["diagnosis_status"] in {
+        "consistent",
+        "model_disagreement",
+    }
+    assert isinstance(result["health_score"], int)
+    assert 0 <= result["health_score"] <= 100
+    assert result["risk_level"] in {"low", "medium", "high", "uncertain"}
+    assert isinstance(result["maintenance_recommendation"], str)
+    assert len(result["maintenance_recommendation"]) > 0
+
+def test_sensor_prediction_rejects_missing_fields():
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/v1/predictions/",
+        json={"motor_temp_c": 45},
+    )
+
+    assert response.status_code == 422

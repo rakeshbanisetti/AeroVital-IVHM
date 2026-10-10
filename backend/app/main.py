@@ -3,6 +3,7 @@ from fastapi import FastAPI
 
 from app.api.uavs import router as uavs_router
 from app.core.config import settings
+from app.api.predictions import router as predictions_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -36,3 +37,4 @@ app.include_router(
     uavs_router,
     prefix=settings.api_prefix,
 )
+app.include_router(predictions_router, prefix=settings.api_prefix)
