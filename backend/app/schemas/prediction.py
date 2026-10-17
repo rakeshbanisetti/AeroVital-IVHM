@@ -21,7 +21,6 @@ class SensorPredictionRequest(BaseModel):
     ambient_temp_c: float = Field(ge=-100, le=100)
     pressure_hpa: float = Field(gt=0, le=1200)
     humidity_pct: float = Field(ge=0, le=100)
-    degradation_level: float = Field(ge=0, le=1)
 
 
 class SensorPredictionResponse(BaseModel):

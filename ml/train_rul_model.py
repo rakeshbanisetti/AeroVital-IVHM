@@ -15,9 +15,7 @@ FEATURES = [
     "motor_vibration",
     "motor_current_a",
     "motor_rpm",
-    "degradation_level",
 ]
-
 TARGET = "rul_seconds"
 
 

@@ -7,13 +7,13 @@
 - Training rows: 24000
 - Test rows: 6000
 - Held-out test scenarios: 6
-- Features: motor_temp_c, motor_vibration, motor_current_a, motor_rpm, degradation_level
+- Features: motor_temp_c, motor_vibration, motor_current_a, motor_rpm
 - Target: `rul_seconds` in seconds
 
 ## Held-out scenario metrics
-- Mean Absolute Error (MAE): 56.927 seconds
-- Root Mean Squared Error (RMSE): 72.743 seconds
-- R-squared: 0.9365
+- Mean Absolute Error (MAE): 71.683 seconds
+- Root Mean Squared Error (RMSE): 86.406 seconds
+- R-squared: 0.9104
 
 ## Limitations
 This is an initial baseline evaluated on synthetic scenarios. The
