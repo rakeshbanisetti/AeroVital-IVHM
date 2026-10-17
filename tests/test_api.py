@@ -77,6 +77,7 @@ def test_sensor_prediction_endpoint():
         "ambient_temp_c": 25,
         "pressure_hpa": 1013,
         "humidity_pct": 40,
+        "degradation_level": 0.5,
     }
 
     response = client.post("/api/v1/predictions/", json=sensor_data)

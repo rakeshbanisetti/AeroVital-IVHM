@@ -12,6 +12,9 @@ ANOMALY_FEATURES_PATH = ARTIFACT_DIR / "anomaly_features.joblib"
 DIAGNOSIS_MODEL_PATH = ARTIFACT_DIR / "fault_diagnosis_rf.joblib"
 DIAGNOSIS_FEATURES_PATH = ARTIFACT_DIR / "diagnosis_features.joblib"
 
+RUL_MODEL_PATH = ARTIFACT_DIR / "rul_random_forest.joblib"
+RUL_FEATURES_PATH = ARTIFACT_DIR / "rul_features.joblib"
+
 
 class PredictionService:
     def __init__(self):
@@ -21,21 +24,18 @@ class PredictionService:
         self.diagnosis_model = joblib.load(DIAGNOSIS_MODEL_PATH)
         self.diagnosis_features = joblib.load(DIAGNOSIS_FEATURES_PATH)
 
+        self.rul_model = joblib.load(RUL_MODEL_PATH)
+        self.rul_features = joblib.load(RUL_FEATURES_PATH)
+
     def predict(self, sensor_data: dict) -> dict:
-        anomaly_input = pd.DataFrame(
-            [sensor_data],
-            columns=self.anomaly_features,
-        )
-        diagnosis_input = pd.DataFrame(
-            [sensor_data],
-            columns=self.diagnosis_features,
+        required_features = set(
+            self.anomaly_features
+            + self.diagnosis_features
+            + self.rul_features
         )
 
         missing_features = [
-            feature
-            for feature in set(
-                self.anomaly_features + self.diagnosis_features
-            )
+            feature for feature in required_features
             if feature not in sensor_data
         ]
 
@@ -44,12 +44,30 @@ class PredictionService:
                 f"Missing required sensor features: {sorted(missing_features)}"
             )
 
+        anomaly_input = pd.DataFrame(
+            [sensor_data],
+            columns=self.anomaly_features,
+        )
+        diagnosis_input = pd.DataFrame(
+            [sensor_data],
+            columns=self.diagnosis_features,
+        )
+        rul_input = pd.DataFrame(
+            [sensor_data],
+            columns=self.rul_features,
+        )
+
         anomaly_prediction = int(
             self.anomaly_model.predict(anomaly_input)[0] == -1
         )
 
         diagnosis_prediction = str(
             self.diagnosis_model.predict(diagnosis_input)[0]
+        )
+
+        rul_prediction = max(
+            0.0,
+            float(self.rul_model.predict(rul_input)[0]),
         )
 
         return {
@@ -60,6 +78,7 @@ class PredictionService:
                 if bool(anomaly_prediction) == (diagnosis_prediction != "normal")
                 else "model_disagreement"
             ),
+            "predicted_rul_seconds": round(rul_prediction, 2),
         }
 
 
